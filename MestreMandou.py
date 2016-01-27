@@ -3,7 +3,7 @@
 
 import telepot, time, psutil, humanize, pprint,os, subprocess
 
-admins = ['mthbernardes']
+admins = ['mthbernardes','B1zzy1']
 
 def get_api():
     api_key = open('api_key.txt','r').read().strip()
@@ -15,7 +15,10 @@ def handle_message(msg):
     sobrenome = msg['from']['last_name']
     username = msg['from']['username']
     content_type, chat_type, chat_id = telepot.glance2(msg)
-
+    print "ID:",user_id
+    print "Nome: "+nome+' '+sobrenome
+    print "Usuario: "+username
+    print "Conteudo: "+content_type
 
     if username in admins:
         #SALVA FOTOS RECEBIDAS
@@ -34,28 +37,36 @@ def handle_message(msg):
         #EXECUTA FUNCOES DE ACORDO COM O QUE FOI ENVIADO
         if content_type is 'text':
             command = msg['text'].lower()
+            print "Conteudo:"
+            print command
             actions(user_id,username,nome,sobrenome,command)
     else:
         bot.sendMessage(user_id, 'Desculpe '+nome+' '+sobrenome+' nao tenho permissao para falar com voce!')
+    print
 
 def bot_help(user_id):
     bot.sendMessage(user_id,
-    ('[+] - Comandos disponiveis - [+]'+
-    '\n'+
-    '\n/system reiniciar - Reinicia servidor'+
-    '\n/system desligar - Desliga o Servidor'+
-    '\n/system discos - Informacoes sobre o disco'+
-    '\n'+
-    '\n/services - Lista todos os serviços e o estado de cada um'+
-    '\n/services start nome_servico - Inicia servico'+
-    '\n/services stop nome_servico - Para servico'+
-    '\n/services restart nome_servico - Renicia servico'+
-    '\n/services status nome_servico - Retorna status servico'))
+    '''
+    [+] - Comandos disponiveis - [+]
+    /system reiniciar - Reinicia servidor
+    /system desligar - Desliga o Servidor
+    /system discos - Informacoes sobre o disco
+
+    /services - Lista todos os serviços e o estado de cada um
+    /services start nome_servico - Inicia servico
+    /services stop nome_servico - Para servico
+    /services restart nome_servico - Renicia servico
+    /services status nome_servico - Retorna status servico'
+
+    /apt update
+    /apt upgrade
+    /apt install pacote
+    /apt remove pacote
+    ''')
 
 
 def actions(user_id,username,nome,sobrenome,command):
     command = command.split()
-    print command
     if command[0] == '/system':
         if len(command) >= 2:
             if 'reiniciar' in command[1]:
@@ -83,7 +94,7 @@ def actions(user_id,username,nome,sobrenome,command):
         else:
             bot_help(user_id)
 
-    elif '/services' in command[0]:
+    elif command[0] == '/services':
         if len(command) < 3:
             system = subprocess.check_output(['service', '--status-all'])
             bot.sendMessage(user_id, system)
@@ -115,7 +126,39 @@ def actions(user_id,username,nome,sobrenome,command):
                 except:
                     pass
 
-    elif '/help' in command[0]:
+    elif command[0] == '/apt':
+        if len(command) == 2:
+            if command[1] == 'update':
+                system = subprocess.check_output(['apt-get', command[1]])
+                try:
+                    bot.sendMessage(user_id, system)
+                except:
+                    pass
+
+            elif command[1] == 'upgrade':
+                system = subprocess.check_output(['apt-get', command[1]])
+                try:
+                    bot.sendMessage(user_id, system)
+                except:
+                    pass
+
+        elif len(command) == 3:
+            if command[1] == 'install':
+                system = subprocess.check_output(['apt-get', '-y', command[1], command[2]])
+                try:
+                    bot.sendMessage(user_id, system)
+                except:
+                    pass
+            elif command[1] == 'remove':
+                system = subprocess.check_output(['apt-get', '-y', command[1], command[2]])
+                try:
+                    bot.sendMessage(user_id, system)
+                except:
+                    pass
+        else:
+            bot_help(user_id)
+
+    elif command[0] == '/help':
         bot_help(user_id)
 
     else:
