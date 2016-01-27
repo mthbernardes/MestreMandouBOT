@@ -3,7 +3,7 @@
 
 import telepot, time, psutil, humanize, pprint,os, subprocess
 
-admins = ['mthbernardes','B1zzy1']
+admins = ['mthbernardes']
 
 def get_api():
     api_key = open('api_key.txt','r').read().strip()
@@ -27,15 +27,19 @@ def handle_message(msg):
             bot.downloadFile(file_id, 'photos/'+file_id+'.jpg')
 
         #SALVA VIDEOS RECEBIDOS
-        if content_type is 'video':
+        elif content_type is 'voice':
+            bot.downloadFile(msg['voice']['file_id'], 'voices/'+msg['voice']['file_id']+'.ogg')
+
+        #SALVA VIDEOS RECEBIDOS
+        elif content_type is 'video':
             bot.downloadFile(msg['video']['file_id'], 'videos/'+msg['video']['file_id'])
 
         #SALVA DOCUMENTOS RECEBIDOS
-        if content_type is 'document':
+        elif content_type is 'document':
             bot.downloadFile(msg['document']['file_id'], 'documents/'+msg['document']['file_name'])
 
         #EXECUTA FUNCOES DE ACORDO COM O QUE FOI ENVIADO
-        if content_type is 'text':
+        elif content_type is 'text':
             command = msg['text'].lower()
             print "Conteudo:"
             print command
@@ -48,6 +52,7 @@ def bot_help(user_id):
     bot.sendMessage(user_id,
     '''
     [+] - Comandos disponiveis - [+]
+
     /system reiniciar - Reinicia servidor
     /system desligar - Desliga o Servidor
     /system discos - Informacoes sobre o disco
